@@ -20,7 +20,7 @@ async function run() {
   try {
     const productsCollection = client.db("dealPoints").collection("products");
     const usersCollection = client.db("dealPoints").collection("users");
-    const bookingCollection = client.db("dealPoints").collection("bookings");
+    const bookingsCollection = client.db("dealPoints").collection("bookings");
 
     app.get("/products", async (req, res) => {
       const query = {};
@@ -47,10 +47,16 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/bookings", async (req, res) => {
+      const query = {};
+      const bookings = await bookingsCollection.find(query).toArray();
+      res.send(bookings);
+    });
+
     app.post("/bookings", async (req, res) => {
-      const user = req.body;
-      const result = await bookingCollection.insertOne(user);
-      res.send(result);
+      const booking = req.body;
+      const booked = await bookingsCollection.insertOne(booking);
+      res.send(booked);
     });
   } finally {
   }
