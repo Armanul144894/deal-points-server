@@ -62,6 +62,12 @@ async function run() {
       const booked = await bookingsCollection.insertOne(booking);
       res.send(booked);
     });
+
+    app.get("/addedProducts", async (req, res) => {
+      const query = {};
+      const products = await addedProductsCollection.find(query).toArray();
+      res.send(products);
+    });
     app.post("/products", async (req, res) => {
       const product = req.body;
       const products = await addedProductsCollection.insertOne(product);
