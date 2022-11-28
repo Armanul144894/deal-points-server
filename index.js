@@ -143,6 +143,12 @@ async function run() {
       res.send(products);
     });
 
+    app.get("/adsProducts", async (req, res) => {
+      const query = {};
+      const product = await advertisementCollection.find(query).toArray();
+      res.send(product);
+    });
+
     app.post("/adsProducts", async (req, res) => {
       const product = req.body;
       const products = await advertisementCollection.insertOne(product);
