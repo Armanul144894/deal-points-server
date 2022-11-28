@@ -121,7 +121,7 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/bookings", async (req, res) => {
+    app.get("/bookings", verifyJWT, async (req, res) => {
       const email = req.query.email;
       const decodedEmail = req.decoded.email;
       if (email !== decodedEmail) {
@@ -168,7 +168,7 @@ async function run() {
       res.send(result);
     });
 
-    app.delete("/adsProducts/:id", async (req, res) => {
+    app.delete("/adsProducts/:id", verifyJWT, async (req, res) => {
       const id = req.params.id;
       const product = { _id: ObjectId(id) };
       const result = await advertisementCollection.deleteOne(product);
