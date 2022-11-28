@@ -82,7 +82,7 @@ async function run() {
       res.status(403).send({ accessToken: "" });
     });
 
-    app.get("/users", async (req, res) => {
+    app.get("/users", verifyJWT, verifyAdmin, async (req, res) => {
       const query = {};
       const users = await usersCollection.find(query).toArray();
       res.send(users);
@@ -93,6 +93,12 @@ async function run() {
       const query = { email };
       const user = await usersCollection.findOne(query);
       res.send({ isSeller: user?.role === "seller" });
+    });
+    app.get("/users/buyer/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email };
+      const user = await usersCollection.findOne(query);
+      res.send({ isBuyer: user?.role === "buyer" });
     });
 
     app.get("/users/admin/:email", async (req, res) => {
@@ -108,7 +114,7 @@ async function run() {
       res.send(result);
     });
 
-    app.delete("/users/:id", async (req, res) => {
+    app.delete("/users/:id", verifyJWT, verifyAdmin, async (req, res) => {
       const id = req.params.id;
       const filter = { _id: ObjectId(id) };
       const result = await usersCollection.deleteOne(filter);
@@ -117,22 +123,22 @@ async function run() {
 
     app.get("/bookings", async (req, res) => {
       const email = req.query.email;
-      //   const decodedEmail = req.decoded.email;
-      //   if (email !== decodedEmail) {
-      //     return res.status(403).send({ message: "forbidden access" });
-      //   }
+      const decodedEmail = req.decoded.email;
+      if (email !== decodedEmail) {
+        return res.status(403).send({ message: "forbidden access" });
+      }
       const query = { email: email };
       const bookings = await bookingsCollection.find(query).toArray();
       res.send(bookings);
     });
 
-    app.post("/bookings", async (req, res) => {
+    app.post("/bookings", verifyJWT, async (req, res) => {
       const booking = req.body;
       const booked = await bookingsCollection.insertOne(booking);
       res.send(booked);
     });
 
-    app.get("/addedProducts", async (req, res) => {
+    app.get("/addedProducts", verifyJWT, async (req, res) => {
       const query = {};
       const products = await addedProductsCollection.find(query).toArray();
       res.send(products);
@@ -155,10 +161,17 @@ async function run() {
       res.send(products);
     });
 
-    app.delete("/addedProducts/:id", async (req, res) => {
+    app.delete("/addedProducts/:id", verifyJWT, async (req, res) => {
       const id = req.params.id;
       const filter = { _id: ObjectId(id) };
       const result = await addedProductsCollection.deleteOne(filter);
+      res.send(result);
+    });
+
+    app.delete("/adsProducts/:id", async (req, res) => {
+      const id = req.params.id;
+      const product = { _id: ObjectId(id) };
+      const result = await advertisementCollection.deleteOne(product);
       res.send(result);
     });
   } finally {
