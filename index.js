@@ -41,6 +41,9 @@ async function run() {
     const addedProductsCollection = client
       .db("dealPoints")
       .collection("addedProducts");
+    const advertisementCollection = client
+      .db("dealPoints")
+      .collection("advertiseItems");
 
     const verifyAdmin = async (req, res, next) => {
       const decodedEmail = req.decoded.email;
@@ -85,11 +88,11 @@ async function run() {
       res.send(users);
     });
 
-    app.get("/users/:role", async (req, res) => {
-      const role = req.query.role;
-      const query = { role: role };
+    app.get("/users/seller/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email };
       const user = await usersCollection.findOne(query);
-      res.send(user);
+      res.send({ isSeller: user?.role === "seller" });
     });
 
     app.get("/users/admin/:email", async (req, res) => {
@@ -137,6 +140,12 @@ async function run() {
     app.post("/products", async (req, res) => {
       const product = req.body;
       const products = await addedProductsCollection.insertOne(product);
+      res.send(products);
+    });
+
+    app.post("/adsProducts", async (req, res) => {
+      const product = req.body;
+      const products = await advertisementCollection.insertOne(product);
       res.send(products);
     });
 
