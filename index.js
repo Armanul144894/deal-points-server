@@ -42,6 +42,17 @@ async function run() {
       .db("dealPoints")
       .collection("addedProducts");
 
+    const verifyAdmin = async (req, res, next) => {
+      const decodedEmail = req.decoded.email;
+      const query = { email: decodedEmail };
+      const user = await usersCollection.findOne(query);
+
+      if (user?.role !== "admin") {
+        return res.status(403).send({ message: "forbidden access" });
+      }
+      next();
+    };
+
     app.get("/products", async (req, res) => {
       const query = {};
       const products = await productsCollection.find(query).toArray();
@@ -74,11 +85,18 @@ async function run() {
       res.send(users);
     });
 
-    app.get("/users/seller/:email", async (req, res) => {
+    app.get("/users/:role", async (req, res) => {
+      const role = req.query.role;
+      const query = { role: role };
+      const user = await usersCollection.findOne(query);
+      res.send(user);
+    });
+
+    app.get("/users/admin/:email", async (req, res) => {
       const email = req.params.email;
       const query = { email };
       const user = await usersCollection.findOne(query);
-      res.send({ isSeller: user?.role === "seller" });
+      res.send({ isAdmin: user?.role === "admin" });
     });
 
     app.post("/users", async (req, res) => {
